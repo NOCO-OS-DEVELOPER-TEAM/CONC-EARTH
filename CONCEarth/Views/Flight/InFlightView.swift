@@ -312,12 +312,18 @@ struct InFlightView: View {
 
     private func updateCamera(animated: Bool) {
         guard let session else { return }
-        let camera = RouteGeometry.mapCamera(
+        let pose = RouteGeometry.cameraPose(
             mode: coordinator.cameraMode,
             origin: session.route.origin.coordinate,
             destination: session.route.destination.coordinate,
             progress: progress,
             scenario: session.scenario
+        )
+        let camera = MapCamera(
+            centerCoordinate: pose.center,
+            distance: pose.distance,
+            heading: pose.heading,
+            pitch: pose.pitch
         )
         if animated {
             withAnimation(.easeInOut(duration: 0.8)) {

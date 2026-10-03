@@ -1,3 +1,4 @@
+import CoreGraphics
 import CoreLocation
 import Foundation
 import MapKit
@@ -60,13 +61,13 @@ enum RouteGeometry {
         return initialBearing(from: p0, to: p1)
     }
 
-    static func mapCamera(
+    static func cameraPose(
         mode: FlightCameraMode,
         origin: CLLocationCoordinate2D,
         destination: CLLocationCoordinate2D,
         progress: Double,
         scenario: FlightScenario
-    ) -> MapCamera {
+    ) -> CameraPose {
         let plane = point(from: origin, to: destination, progress: progress)
         let heading = heading(from: origin, to: destination, progress: progress)
 
@@ -76,15 +77,22 @@ enum RouteGeometry {
             let distance = CLLocation(latitude: origin.latitude, longitude: origin.longitude)
                 .distance(from: CLLocation(latitude: destination.latitude, longitude: destination.longitude))
             let altitude = max(80_000, min(1_800_000, distance * 1.35))
-            return MapCamera(centerCoordinate: mid, distance: altitude, heading: 0, pitch: 35)
+            return CameraPose(center: mid, distance: altitude, heading: 0, pitch: 35)
         case .follow:
             let altitude: CLLocationDistance = scenario == .longHaul ? 18_000 : 12_000
-            return MapCamera(centerCoordinate: plane, distance: altitude, heading: heading, pitch: 55)
+            return CameraPose(center: plane, distance: altitude, heading: heading, pitch: 55)
         case .window:
             let altitude: CLLocationDistance = 8_500
-            return MapCamera(centerCoordinate: plane, distance: altitude, heading: heading + 25, pitch: 70)
+            return CameraPose(center: plane, distance: altitude, heading: heading + 25, pitch: 70)
         }
     }
+}
+
+struct CameraPose {
+    let center: CLLocationCoordinate2D
+    let distance: CLLocationDistance
+    let heading: CLLocationDirection
+    let pitch: CGFloat
 }
 
 enum FlightCameraMode: String, CaseIterable, Identifiable {

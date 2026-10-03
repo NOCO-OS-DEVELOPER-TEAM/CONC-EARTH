@@ -20,13 +20,13 @@ final class AppCoordinator: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var lastLiveActivityUpdate = Date.distantPast
 
-    init(
-        store: SessionStore = SessionStore(),
-        timer: FocusTimerService = FocusTimerService(),
-        audio: AudioService = AudioService(),
-        location: LocationService = LocationService(),
-        liveActivity: LiveActivityService = LiveActivityService()
-    ) {
+    init() {
+        let store = SessionStore()
+        let timer = FocusTimerService()
+        let audio = AudioService()
+        let location = LocationService()
+        let liveActivity = LiveActivityService()
+
         self.store = store
         self.timer = timer
         self.audio = audio

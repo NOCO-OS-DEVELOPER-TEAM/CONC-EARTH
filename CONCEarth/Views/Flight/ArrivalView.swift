@@ -57,29 +57,42 @@ struct ArrivalView: View {
 }
 
 struct ConfettiView: View {
-    private let pieces: [(x: CGFloat, hue: Double, size: CGFloat, rot: Double)] = (0..<28).map { i in
-        (
+    private struct Piece: Identifiable {
+        let id: Int
+        let x: CGFloat
+        let hue: Double
+        let size: CGFloat
+        let rot: Double
+        let yFactor: CGFloat
+    }
+
+    private let pieces: [Piece] = (0..<20).map { i in
+        Piece(
+            id: i,
             x: CGFloat((i * 37) % 100) / 100.0,
             hue: Double((i * 47) % 100) / 100.0,
             size: CGFloat((i % 5) + 5),
-            rot: Double((i * 23) % 360)
+            rot: Double((i * 23) % 360),
+            yFactor: 0.12 + CGFloat(i % 7) * 0.05
         )
     }
 
     var body: some View {
         GeometryReader { geo in
-            ForEach(pieces.indices, id: \.self) { index in
-                let piece = pieces[index]
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color(hue: piece.hue, saturation: 0.75, brightness: 0.95))
-                    .frame(width: piece.size, height: piece.size * 1.4)
-                    .rotationEffect(.degrees(piece.rot))
-                    .position(
-                        x: piece.x * geo.size.width,
-                        y: geo.size.height * (0.12 + CGFloat(index % 7) * 0.05)
-                    )
-                    .opacity(0.85)
+            ZStack {
+                ForEach(pieces) { piece in
+                    confettiPiece(piece, in: geo.size)
+                }
             }
         }
+    }
+
+    private func confettiPiece(_ piece: Piece, in size: CGSize) -> some View {
+        RoundedRectangle(cornerRadius: 2)
+            .fill(Color(hue: piece.hue, saturation: 0.75, brightness: 0.95))
+            .frame(width: piece.size, height: piece.size * 1.4)
+            .rotationEffect(.degrees(piece.rot))
+            .position(x: piece.x * size.width, y: size.height * piece.yFactor)
+            .opacity(0.85)
     }
 }
