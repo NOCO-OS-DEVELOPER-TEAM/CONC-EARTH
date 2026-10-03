@@ -13,54 +13,79 @@ final class LiveActivityService: ObservableObject {
             flightNumber: session.route.flightNumber,
             scenarioTitle: session.scenario.title
         )
-        let state = FocusFlightAttributes.ContentState(
-            originIATA: session.route.originIATA,
-            destinationIATA: session.route.destinationIATA,
-            remainingSeconds: Int(session.remainingSeconds()),
-            progress: session.progress(),
-            statusText: "In Flight",
-            seatCode: session.seat.displayCode
-        )
 
         do {
             activity = try Activity.request(
                 attributes: attributes,
-                content: .init(state: state, staleDate: nil),
+                content: .init(state: state(for: session), staleDate: nil),
                 pushType: nil
             )
         } catch {
-            // Live Activities may be disabled by the user; flight continues normally.
+            // Live Activities may be disabled; flight continues normally.
         }
     }
 
     func update(session: FocusSession) {
         guard let activity else { return }
-        let state = FocusFlightAttributes.ContentState(
-            originIATA: session.route.originIATA,
-            destinationIATA: session.route.destinationIATA,
-            remainingSeconds: Int(session.remainingSeconds()),
-            progress: session.progress(),
-            statusText: session.status == .paused ? "Paused" : "In Flight",
-            seatCode: session.seat.displayCode
-        )
         Task {
-            await activity.update(.init(state: state, staleDate: nil))
+            await activity.update(.init(state: state(for: session), staleDate: nil))
         }
     }
 
     func end(session: FocusSession?) {
         guard let activity else { return }
-        let state = FocusFlightAttributes.ContentState(
-            originIATA: session?.route.originIATA ?? "—",
-            destinationIATA: session?.route.destinationIATA ?? "—",
-            remainingSeconds: 0,
-            progress: 1,
-            statusText: "Landed",
-            seatCode: session?.seat.displayCode ?? "—"
-        )
+        let finalState: FocusFlightAttributes.ContentState
+        if let session {
+            finalState = FocusFlightAttributes.ContentState(
+                originIATA: session.route.originIATA,
+                destinationIATA: session.route.destinationIATA,
+                remainingSeconds: 0,
+                progress: 1,
+                statusText: "LANDED",
+                seatCode: session.seat.displayCode,
+                focusMinutes: session.focusMinutes,
+                distanceKilometers: Int(session.route.distanceKilometers.rounded()),
+                isLanded: true
+            )
+        } else {
+            finalState = FocusFlightAttributes.ContentState(
+                originIATA: "—",
+                destinationIATA: "—",
+                remainingSeconds: 0,
+                progress: 1,
+                statusText: "LANDED",
+                seatCode: "—",
+                focusMinutes: 0,
+                distanceKilometers: 0,
+                isLanded: true
+            )
+        }
         Task {
-            await activity.end(.init(state: state, staleDate: nil), dismissalPolicy: .after(.now + 60))
+            await activity.end(.init(state: finalState, staleDate: nil), dismissalPolicy: .after(.now + 90))
         }
         self.activity = nil
+    }
+
+    private func state(for session: FocusSession) -> FocusFlightAttributes.ContentState {
+        let phase = session.phase()
+        let status: String
+        switch session.status {
+        case .paused: status = "Paused"
+        case .takeoff: status = "Takeoff"
+        case .landing: status = "Landing"
+        default: status = phase == .landing ? "Landing" : "In Flight"
+        }
+
+        return FocusFlightAttributes.ContentState(
+            originIATA: session.route.originIATA,
+            destinationIATA: session.route.destinationIATA,
+            remainingSeconds: Int(session.remainingSeconds()),
+            progress: session.progress(),
+            statusText: status,
+            seatCode: session.seat.displayCode,
+            focusMinutes: session.focusMinutes,
+            distanceKilometers: Int(session.route.distanceKilometers.rounded()),
+            isLanded: false
+        )
     }
 }

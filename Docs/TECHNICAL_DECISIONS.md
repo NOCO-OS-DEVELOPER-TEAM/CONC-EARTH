@@ -32,3 +32,15 @@
 
 - CI always attempts an unsigned Release compile
 - Signed IPA export runs only when Apple signing secrets are present
+
+## Experience expansion
+
+- Airport catalog is expandable (dozens now; architecture supports hundreds)
+- Unlock pacing uses flight count + flight miles tiers; destination always unlocks
+- Flight miles = cumulative virtual kilometers (no XP bar)
+- Achievements appear only as quiet toasts + a calm Journey list
+- Window Seat Experience is MapKit 3D/imagery + atmospheric SwiftUI overlay (no invented geo mesh)
+- Flight phases: Boarding → Takeoff → Cruise → Landing → Landed
+- Atmosphere evolves softly with session progress + scenario
+- “Take me somewhere” picks a route banded by focus duration
+- Focus purpose is optional local metadata on each session / boarding pass

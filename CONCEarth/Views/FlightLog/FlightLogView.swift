@@ -15,7 +15,7 @@ struct FlightLogView: View {
                     }
                     Spacer()
                     Text("FlightLog")
-                        .font(CEFont.body(17, weight: .bold))
+                        .font(CEFont.body(17, weight: .semibold))
                         .foregroundStyle(.white)
                     Spacer()
                     Color.clear.frame(width: 44, height: 44)
@@ -23,36 +23,22 @@ struct FlightLogView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 18) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Passenger name")
-                                .font(CEFont.body(12))
-                                .foregroundStyle(.white.opacity(0.5))
-                            TextField("Traveler", text: $store.passengerName)
-                                .textInputAutocapitalization(.words)
-                                .padding(12)
-                                .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
-                                .foregroundStyle(.white)
-
-                            Toggle("Flight sounds", isOn: $store.soundsEnabled)
-                                .tint(CEColor.horizonTeal)
-                                .foregroundStyle(.white)
-                        }
-                        .padding(14)
-                        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16))
-
-                        statsGrid
-                        Text("Past flights")
-                            .font(CEFont.body(14, weight: .semibold))
-                            .foregroundStyle(.white.opacity(0.55))
-                            .padding(.top, 8)
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Travel journal")
+                            .font(CEFont.body(13))
+                            .foregroundStyle(.white.opacity(0.4))
 
                         if store.completedSessions.isEmpty {
                             emptyState
                         } else {
                             ForEach(store.completedSessions) { session in
-                                flightRow(session)
+                                Button {
+                                    coordinator.openBoardingPass(session.id)
+                                } label: {
+                                    flightRow(session)
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
                     }
@@ -62,73 +48,52 @@ struct FlightLogView: View {
         }
     }
 
-    private var statsGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            statCard("Focus time", TimeFormatting.shortDuration(store.totalFocusSeconds))
-            statCard("Flights", "\(store.completedSessions.count)")
-            statCard("Distance", String(format: "%.0f km", store.totalKilometers))
-            statCard("Longest", TimeFormatting.shortDuration(store.longestFlightSeconds))
-            statCard("Streak", "\(store.currentStreakDays)d")
-            statCard("Top route", store.favoriteRouteLabel)
-        }
-    }
-
-    private func statCard(_ title: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(CEFont.body(12))
-                .foregroundStyle(.white.opacity(0.5))
-            Text(value)
-                .font(CEFont.body(18, weight: .bold))
-                .foregroundStyle(.white)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-        }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-    }
-
     private func flightRow(_ session: FocusSession) -> some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle().fill(CEColor.horizonTeal.opacity(0.2))
-                Image(systemName: "airplane")
-                    .foregroundStyle(CEColor.horizonTeal)
-            }
-            .frame(width: 42, height: 42)
-
-            VStack(alignment: .leading, spacing: 4) {
+        HStack(alignment: .top, spacing: 14) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text("\(session.route.originIATA) → \(session.route.destinationIATA)")
-                    .font(CEFont.body(16, weight: .semibold))
+                    .font(CEFont.body(17, weight: .semibold))
                     .foregroundStyle(.white)
-                Text("\(TimeFormatting.shortDuration(session.focusDurationSeconds)) · Seat \(session.seat.displayCode) · \(session.scenario.title)")
-                    .font(CEFont.body(12))
-                    .foregroundStyle(.white.opacity(0.5))
+                Text(session.route.destination.displayTitle)
+                    .font(CEFont.body(13))
+                    .foregroundStyle(.white.opacity(0.55))
+                HStack(spacing: 10) {
+                    Text(TimeFormatting.shortDuration(session.focusDurationSeconds))
+                    Text("·")
+                    Text(session.seat.unlocksWindowView ? "Window" : session.seat.displayCode)
+                    Text("·")
+                    Text(String(format: "%.0f km", session.route.distanceKilometers))
+                }
+                .font(CEFont.body(12))
+                .foregroundStyle(.white.opacity(0.4))
+
+                if session.hasPurpose {
+                    Text(session.focusPurpose)
+                        .font(CEFont.body(12))
+                        .foregroundStyle(CEColor.horizonTeal.opacity(0.9))
+                        .padding(.top, 2)
+                }
             }
             Spacer()
-            Text("Completed")
+            Text("Pass")
                 .font(CEFont.body(11, weight: .semibold))
-                .foregroundStyle(CEColor.horizonTeal)
+                .foregroundStyle(.white.opacity(0.45))
         }
-        .padding(14)
-        .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .padding(16)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private var emptyState: some View {
         VStack(spacing: 10) {
-            Image(systemName: "globe.europe.africa")
-                .font(.system(size: 34, weight: .light))
-                .foregroundStyle(.white.opacity(0.4))
-            Text("No flights yet")
+            Text("No journeys yet")
                 .font(CEFont.body(16, weight: .semibold))
                 .foregroundStyle(.white)
-            Text("Complete a focus flight and it will appear here.")
+            Text("Completed focus flights become part of your journal.")
                 .font(CEFont.body(13))
-                .foregroundStyle(.white.opacity(0.5))
+                .foregroundStyle(.white.opacity(0.45))
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 40)
+        .padding(.vertical, 48)
     }
 }

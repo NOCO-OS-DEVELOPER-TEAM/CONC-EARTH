@@ -9,6 +9,9 @@ struct FocusFlightAttributes: ActivityAttributes {
         var progress: Double
         var statusText: String
         var seatCode: String
+        var focusMinutes: Int
+        var distanceKilometers: Int
+        var isLanded: Bool
     }
 
     var flightNumber: String

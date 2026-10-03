@@ -8,18 +8,16 @@ Built with **Swift**, **SwiftUI**, **MapKit**, **Core Location**, and **Activity
 
 ---
 
-## Features (MVP)
+## Features
 
-- Home map with suggested / home airport
-- 8 airports + expandable route catalog
-- Focus duration + scenario selection (Calm, Night, Sunset, Morning, Storm, Long Haul)
-- Seat map with window-seat → Window View unlock
-- Animated digital ticket + boarding sequence
-- In-flight Route / Follow / Window cameras on MapKit
-- Pause / resume with progress restoration after relaunch
-- FlightLog + stats
+- Immersive focus flights with boarding → takeoff → cruise → landing
+- Signature **Window Seat Experience** (MapKit + calm atmosphere)
+- Take me somewhere · focus purpose · collectible boarding passes
+- Expandable airport catalog with quiet unlocks + flight miles
+- Your World map · Journey summary · discreet milestones
+- Dynamic atmosphere (clear / clouds / rain / sunrise / day / sunset / night)
 - Live Activities + Dynamic Island
-- No fake app-blocking claims
+- No fake app-blocking · no loud gamification
 
 ---
 

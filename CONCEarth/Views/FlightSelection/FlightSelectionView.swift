@@ -7,7 +7,11 @@ struct FlightSelectionView: View {
     @State private var cameraPosition: MapCameraPosition = .automatic
 
     private var routes: [FlightRoute] {
-        RouteCatalog.routes(reachableWithinMinutes: coordinator.focusMinutes, from: coordinator.homeAirport.iata)
+        RouteCatalog.routes(
+            reachableWithinMinutes: coordinator.focusMinutes,
+            from: coordinator.homeAirport.iata,
+            unlocked: coordinator.unlockedIATAs
+        )
     }
 
     private let focusOptions = [25, 30, 45, 60, 90, 120]

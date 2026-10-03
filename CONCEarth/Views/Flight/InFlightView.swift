@@ -7,10 +7,7 @@ struct InFlightView: View {
     @EnvironmentObject private var timer: FocusTimerService
 
     @State private var cameraPosition: MapCameraPosition = .automatic
-    @State private var mapStyleIndex = 0
-    @State private var showMapStyles = false
     @State private var cabinNoiseOn = true
-    @State private var trailProgress: Double = 0
 
     private var session: FocusSession? { store.activeSession }
 
@@ -20,6 +17,15 @@ struct InFlightView: View {
 
     private var remaining: TimeInterval {
         session?.remainingSeconds(at: timer.now) ?? 0
+    }
+
+    private var atmosphere: AtmosphereCondition {
+        guard let session else { return .clear }
+        return AtmosphereEngine.condition(scenario: session.scenario, progress: progress, at: timer.now)
+    }
+
+    private var phase: FlightPhase {
+        session?.phase(at: timer.now) ?? .cruise
     }
 
     private var planeCoordinate: CLLocationCoordinate2D {
@@ -33,287 +39,215 @@ struct InFlightView: View {
         )
     }
 
-    private var flownKilometers: Double {
-        (session?.route.distanceKilometers ?? 0) * progress
-    }
-
     var body: some View {
         ZStack {
-            mapLayer
-            scenarioWash.allowsHitTesting(false)
-
-            if coordinator.cameraMode == .window, session?.seat.unlocksWindowView == true {
-                WindowViewOverlay(scenario: session?.scenario ?? .calm)
-                    .allowsHitTesting(false)
+            if coordinator.presentationMode == .window,
+               let session,
+               session.seat.unlocksWindowView {
+                WindowSeatExperience(
+                    session: session,
+                    progress: progress,
+                    remaining: remaining,
+                    atmosphere: atmosphere
+                )
+            } else {
+                mapExperience
             }
 
             VStack {
-                HStack(alignment: .top) {
-                    leftControls
-                    Spacer()
-                    rightControls
-                }
-                .padding(.horizontal, 14)
-                .padding(.top, 8)
-
+                topBar
                 if coordinator.showStayFocusedHint {
-                    Text("Stay focused — your flight continues with you.")
+                    Text("Stay with the flight.")
                         .font(CEFont.body(13, weight: .medium))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.white.opacity(0.85))
                         .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
+                        .padding(.vertical, 9)
                         .background(.ultraThinMaterial, in: Capsule())
-                        .padding(.top, 10)
-                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .padding(.top, 8)
+                        .transition(.opacity)
                 }
-
                 Spacer()
-                bottomStats
-            }
-
-            if showMapStyles {
-                mapStylePicker
+                if coordinator.presentationMode == .map {
+                    mapBottomStats
+                }
             }
         }
         .onAppear {
             cabinNoiseOn = store.soundsEnabled
             updateCamera(animated: false)
         }
-        .onChange(of: progress) { _, newValue in
-            trailProgress = newValue
-            updateCamera(animated: true)
-        }
-        .onChange(of: coordinator.cameraMode) { _, _ in
-            updateCamera(animated: true)
-        }
+        .onChange(of: progress) { _, _ in updateCamera(animated: false) }
+        .onChange(of: coordinator.cameraMode) { _, _ in updateCamera(animated: true) }
+        .onChange(of: coordinator.presentationMode) { _, _ in updateCamera(animated: true) }
         .onChange(of: timer.now) { _, _ in
-            if session?.status == .inFlight {
+            if session?.status == .inFlight || session?.status == .landing {
                 updateCamera(animated: false)
             }
         }
     }
 
-    private var mapLayer: some View {
-        Map(position: $cameraPosition) {
-            if let session {
-                let path = RouteGeometry.sampledPath(
-                    from: session.route.origin.coordinate,
-                    to: session.route.destination.coordinate
-                )
-                MapPolyline(coordinates: path)
-                    .stroke(Color.white.opacity(0.35), lineWidth: 2)
-
-                let flownCount = max(2, Int(Double(path.count - 1) * progress) + 1)
-                MapPolyline(coordinates: Array(path.prefix(flownCount)))
-                    .stroke(Color.white.opacity(0.85), lineWidth: 3)
-
-                Annotation("DEP", coordinate: session.route.origin.coordinate) {
-                    marker(systemName: "airplane.departure")
+    private var topBar: some View {
+        HStack(alignment: .top) {
+            VStack(spacing: 10) {
+                GlassCircleButton(
+                    systemName: session?.status == .paused ? "play.fill" : "pause.fill",
+                    filled: session?.status == .paused
+                ) {
+                    coordinator.togglePause()
                 }
-                Annotation("ARR", coordinate: session.route.destination.coordinate) {
-                    marker(systemName: "airplane.arrival")
-                }
-                Annotation("PLANE", coordinate: planeCoordinate) {
-                    PlaneMarker(
-                        heading: RouteGeometry.heading(
-                            from: session.route.origin.coordinate,
-                            to: session.route.destination.coordinate,
-                            progress: progress
-                        )
+
+                GlassCircleButton(systemName: cabinNoiseOn ? "speaker.wave.2" : "speaker.slash") {
+                    cabinNoiseOn.toggle()
+                    coordinator.audio.setCabinNoise(
+                        enabled: cabinNoiseOn && session?.status != .paused,
+                        soundsOn: store.soundsEnabled
                     )
                 }
             }
-        }
-        .mapStyle(currentMapStyle)
-        .mapControls { }
-        .ignoresSafeArea()
-    }
 
-    private var currentMapStyle: MapStyle {
-        switch mapStyleIndex {
-        case 1: return .standard(elevation: .realistic)
-        case 2: return .hybrid(elevation: .realistic)
-        default: return .imagery(elevation: .realistic)
-        }
-    }
+            Spacer()
 
-    private var scenarioWash: some View {
-        Group {
-            switch session?.scenario {
-            case .night:
-                Color.black.opacity(0.28)
-            case .sunset:
-                LinearGradient(colors: [CEColor.duskOrange.opacity(0.18), .clear], startPoint: .top, endPoint: .center)
-            case .storm:
-                Color.black.opacity(0.22)
-            case .morning:
-                Color.orange.opacity(0.08)
-            default:
-                Color.clear
-            }
-        }
-        .ignoresSafeArea()
-    }
-
-    private var leftControls: some View {
-        VStack(spacing: 10) {
-            GlassCircleButton(
-                systemName: session?.status == .paused ? "play.fill" : "pause.fill",
-                filled: session?.status == .paused
-            ) {
-                coordinator.togglePause()
+            if session?.seat.unlocksWindowView == true {
+                presentationToggle
             }
 
-            GlassCircleButton(systemName: cabinNoiseOn ? "music.note" : "speaker.slash") {
-                cabinNoiseOn.toggle()
-                coordinator.audio.setCabinNoise(enabled: cabinNoiseOn && session?.status == .inFlight, soundsOn: store.soundsEnabled)
-            }
+            Spacer()
 
-            GlassCircleButton(systemName: "camera.metering.center.weighted") {
-                cycleCameraMode()
-            }
-        }
-    }
-
-    private var rightControls: some View {
-        VStack(spacing: 10) {
-            modeCapsule
-            GlassCircleButton(systemName: "square.3.layers.3d") {
-                showMapStyles = true
-            }
-            GlassCircleButton(systemName: "iphone") {
-                coordinator.pulseStayFocused()
-            }
-        }
-    }
-
-    private var modeCapsule: some View {
-        VStack(spacing: 0) {
-            ForEach(availableModes) { mode in
-                Button {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                        coordinator.cameraMode = mode
+            VStack(spacing: 10) {
+                if coordinator.presentationMode == .map {
+                    GlassCircleButton(systemName: "point.topleft.down.to.point.bottomright.curvepath") {
+                        coordinator.cameraMode = coordinator.cameraMode == .route ? .follow : .route
                     }
-                } label: {
-                    Image(systemName: mode.systemImage)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(coordinator.cameraMode == mode ? CEColor.ink : .white)
-                        .frame(width: 44, height: 40)
-                        .background(coordinator.cameraMode == mode ? Color.white : Color.clear)
                 }
-                .buttonStyle(.plain)
+                GlassCircleButton(systemName: "circle.dotted") {
+                    coordinator.pulseStayFocused()
+                }
             }
         }
+        .padding(.horizontal, 14)
+        .padding(.top, 8)
+    }
+
+    private var presentationToggle: some View {
+        HStack(spacing: 0) {
+            toggleChip("Window", selected: coordinator.presentationMode == .window) {
+                if coordinator.presentationMode != .window {
+                    coordinator.togglePresentation()
+                }
+            }
+            toggleChip("Map", selected: coordinator.presentationMode == .map) {
+                if coordinator.presentationMode != .map {
+                    coordinator.togglePresentation()
+                }
+            }
+        }
+        .padding(3)
         .background(.ultraThinMaterial, in: Capsule())
     }
 
-    private var availableModes: [FlightCameraMode] {
-        if session?.seat.unlocksWindowView == true {
-            return [.route, .follow, .window]
+    private func toggleChip(_ title: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(CEFont.body(12, weight: .semibold))
+                .foregroundStyle(selected ? CEColor.ink : .white.opacity(0.75))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(selected ? Color.white : Color.clear, in: Capsule())
         }
-        return [.route, .follow]
+        .buttonStyle(.plain)
     }
 
-    private var bottomStats: some View {
+    private var mapExperience: some View {
+        ZStack {
+            Map(position: $cameraPosition) {
+                if let session {
+                    let path = RouteGeometry.sampledPath(
+                        from: session.route.origin.coordinate,
+                        to: session.route.destination.coordinate
+                    )
+                    MapPolyline(coordinates: path)
+                        .stroke(Color.white.opacity(0.28), lineWidth: 2)
+
+                    let flownCount = max(2, Int(Double(path.count - 1) * progress) + 1)
+                    MapPolyline(coordinates: Array(path.prefix(flownCount)))
+                        .stroke(Color.white.opacity(0.85), lineWidth: 2.5)
+
+                    Annotation("DEP", coordinate: session.route.origin.coordinate) {
+                        tinyMarker()
+                    }
+                    Annotation("ARR", coordinate: session.route.destination.coordinate) {
+                        tinyMarker()
+                    }
+                    Annotation("PLANE", coordinate: planeCoordinate) {
+                        PlaneMarker(
+                            heading: RouteGeometry.heading(
+                                from: session.route.origin.coordinate,
+                                to: session.route.destination.coordinate,
+                                progress: progress
+                            )
+                        )
+                    }
+                }
+            }
+            .mapStyle(.imagery(elevation: .realistic))
+            .mapControls { }
+            .ignoresSafeArea()
+
+            LinearGradient(
+                colors: AtmosphereEngine.washColors(for: atmosphere),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
+        }
+    }
+
+    private var mapBottomStats: some View {
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(session?.status == .paused ? "Paused" : "Flight time")
+                Text(session?.status == .paused ? "Paused" : phase.title)
                     .font(CEFont.body(12, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.65))
+                    .foregroundStyle(.white.opacity(0.55))
                 Text(TimeFormatting.clock(remaining))
-                    .font(CEFont.display(34, weight: .bold))
+                    .font(CEFont.display(32, weight: .bold))
                     .foregroundStyle(.white)
                     .monospacedDigit()
                 if let session {
-                    Text("\(session.route.originIATA) → \(session.route.destinationIATA) · \(Int(progress * 100))%")
+                    Text("\(session.route.originIATA) → \(session.route.destinationIATA)")
                         .font(CEFont.body(12, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.55))
+                        .foregroundStyle(.white.opacity(0.5))
                 }
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 4) {
-                Text("Distance")
+                Text(atmosphere.title)
                     .font(CEFont.body(12, weight: .medium))
-                    .foregroundStyle(.white.opacity(0.65))
-                Text(String(format: "%.0f km", flownKilometers))
-                    .font(CEFont.display(34, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.55))
+                Text("\(Int(progress * 100))%")
+                    .font(CEFont.display(32, weight: .bold))
                     .foregroundStyle(.white)
             }
         }
         .padding(.horizontal, 22)
         .padding(.bottom, 24)
         .background(
-            LinearGradient(colors: [.clear, .black.opacity(0.55)], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [.clear, .black.opacity(0.5)], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
         )
     }
 
-    private var mapStylePicker: some View {
-        ZStack {
-            Color.black.opacity(0.35).ignoresSafeArea()
-                .onTapGesture { showMapStyles = false }
-
-            VStack(alignment: .leading, spacing: 14) {
-                HStack {
-                    Text("Choose map style")
-                        .font(CEFont.body(18, weight: .bold))
-                        .foregroundStyle(.white)
-                    Spacer()
-                    GlassCircleButton(systemName: "xmark") { showMapStyles = false }
-                }
-
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                    styleTile(title: "Satellite", index: 0)
-                    styleTile(title: "Standard", index: 1)
-                    styleTile(title: "Hybrid", index: 2)
-                    styleTile(title: "Terra", index: 0)
-                }
-            }
-            .padding(18)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .padding(24)
-        }
-    }
-
-    private func styleTile(title: String, index: Int) -> some View {
-        Button {
-            mapStyleIndex = index
-            showMapStyles = false
-        } label: {
-            VStack(alignment: .leading, spacing: 8) {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(index == 0 ? Color.green.opacity(0.35) : Color.blue.opacity(0.35))
-                    .frame(height: 72)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(mapStyleIndex == index ? Color.white : Color.clear, lineWidth: 2)
-                    )
-                Text(title)
-                    .font(CEFont.body(13, weight: .semibold))
-                    .foregroundStyle(.white)
-            }
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func marker(systemName: String) -> some View {
-        Image(systemName: systemName)
-            .font(.system(size: 11, weight: .bold))
-            .foregroundStyle(CEColor.ink)
-            .padding(6)
-            .background(CEColor.aviationYellow, in: RoundedRectangle(cornerRadius: 6))
-    }
-
-    private func cycleCameraMode() {
-        let modes = availableModes
-        guard let idx = modes.firstIndex(of: coordinator.cameraMode) else { return }
-        coordinator.cameraMode = modes[(idx + 1) % modes.count]
+    private func tinyMarker() -> some View {
+        Circle()
+            .fill(CEColor.aviationYellow)
+            .frame(width: 8, height: 8)
     }
 
     private func updateCamera(animated: Bool) {
         guard let session else { return }
+        guard coordinator.presentationMode == .map else { return }
         let pose = RouteGeometry.cameraPose(
-            mode: coordinator.cameraMode,
+            mode: coordinator.cameraMode == .window ? .follow : coordinator.cameraMode,
             origin: session.route.origin.coordinate,
             destination: session.route.destination.coordinate,
             progress: progress,
@@ -326,7 +260,7 @@ struct InFlightView: View {
             pitch: pose.pitch
         )
         if animated {
-            withAnimation(.easeInOut(duration: 0.8)) {
+            withAnimation(.easeInOut(duration: 0.7)) {
                 cameraPosition = .camera(camera)
             }
         } else {
@@ -339,71 +273,10 @@ struct PlaneMarker: View {
     let heading: Double
 
     var body: some View {
-        ZStack {
-            // Soft contrail suggestion behind the plane.
-            Capsule()
-                .fill(.white.opacity(0.35))
-                .frame(width: 4, height: 46)
-                .offset(y: 28)
-                .blur(radius: 1.2)
-
-            Image(systemName: "airplane")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(.white)
-                .shadow(color: .black.opacity(0.45), radius: 4, y: 2)
-                .rotationEffect(.degrees(heading - 90))
-        }
-    }
-}
-
-struct WindowViewOverlay: View {
-    let scenario: FlightScenario
-
-    var body: some View {
-        GeometryReader { geo in
-            ZStack {
-                // Window frame
-                RoundedRectangle(cornerRadius: 48, style: .continuous)
-                    .stroke(.white.opacity(0.25), lineWidth: 10)
-                    .padding(28)
-                    .shadow(color: .black.opacity(0.4), radius: 20)
-
-                VStack {
-                    Capsule()
-                        .fill(.white.opacity(0.18))
-                        .frame(width: 90, height: 8)
-                        .padding(.top, 46)
-                    Spacer()
-                }
-
-                // Atmospheric tint inside the window.
-                RoundedRectangle(cornerRadius: 40, style: .continuous)
-                    .fill(windowTint.opacity(0.22))
-                    .padding(38)
-                    .blendMode(.plusLighter)
-                    .allowsHitTesting(false)
-
-                // Soft cloud streaks
-                ForEach(0..<3, id: \.self) { i in
-                    Capsule()
-                        .fill(.white.opacity(0.08 + Double(i) * 0.03))
-                        .frame(width: geo.size.width * (0.35 + Double(i) * 0.1), height: 18)
-                        .offset(x: CGFloat(i * 20 - 30), y: CGFloat(80 + i * 50))
-                        .blur(radius: 2)
-                }
-            }
-        }
-        .ignoresSafeArea()
-    }
-
-    private var windowTint: Color {
-        switch scenario {
-        case .night: return CEColor.nightBlue
-        case .sunset: return CEColor.duskOrange
-        case .morning: return Color.orange
-        case .storm: return CEColor.stormSlate
-        case .longHaul: return CEColor.horizonTeal
-        case .calm: return .white
-        }
+        Image(systemName: "airplane")
+            .font(.system(size: 20, weight: .semibold))
+            .foregroundStyle(.white)
+            .shadow(color: .black.opacity(0.4), radius: 3, y: 1)
+            .rotationEffect(.degrees(heading - 90))
     }
 }

@@ -16,9 +16,8 @@ struct BoardingView: View {
                 Spacer()
 
                 Image(systemName: "airplane.departure")
-                    .font(.system(size: 42, weight: .light))
+                    .font(.system(size: 42, weight: .ultraLight))
                     .foregroundStyle(.white)
-                    .symbolEffect(.pulse, options: .repeating, value: phase)
                     .opacity(phase >= 1 ? 1 : 0)
                     .offset(y: phase >= 1 ? 0 : 16)
 

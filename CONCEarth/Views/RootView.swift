@@ -10,30 +10,36 @@ struct RootView: View {
             switch coordinator.screen {
             case .home:
                 HomeView()
-                    .transition(.opacity.combined(with: .scale(scale: 0.98)))
+            case .takeMeSomewhere:
+                TakeMeSomewhereView()
             case .flightSelection:
                 FlightSelectionView()
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
+            case .focusPurpose:
+                FocusPurposeView()
             case .seatSelection:
                 SeatSelectionView()
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
             case .ticket:
                 TicketView()
-                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
             case .boarding:
                 BoardingView()
-                    .transition(.opacity)
+            case .takeoff:
+                TakeoffView()
             case .inFlight:
                 InFlightView()
-                    .transition(.opacity)
+            case .landing:
+                LandingPhaseView()
             case .arrival:
                 ArrivalView()
-                    .transition(.opacity.combined(with: .scale(scale: 1.02)))
             case .flightLog:
                 FlightLogView()
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            case .world:
+                WorldMapView()
+            case .journey:
+                JourneyView()
+            case .boardingPass(let id):
+                BoardingPassDetailView(sessionID: id)
             }
         }
-        .animation(.spring(response: 0.45, dampingFraction: 0.86), value: coordinator.screen)
+        .animation(.easeInOut(duration: 0.35), value: coordinator.screen)
     }
 }

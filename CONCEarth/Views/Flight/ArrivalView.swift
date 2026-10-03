@@ -1,79 +1,115 @@
 import SwiftUI
+import UIKit
 
 struct ArrivalView: View {
     @EnvironmentObject private var coordinator: AppCoordinator
-    @EnvironmentObject private var store: SessionStore
+    @EnvironmentObject private var journey: JourneyStore
 
-    @State private var showConfetti = false
+    @State private var showUnlock = false
+    @State private var showAchievement = false
+    @State private var contentOpacity = 0.0
 
-    private var lastFlight: FocusSession? {
-        store.completedSessions.first
+    private var flight: FocusSession? {
+        coordinator.completedSessionForArrival
     }
 
     var body: some View {
         ZStack {
             CEColor.earthDeep.ignoresSafeArea()
             LinearGradient(
-                colors: [Color.white.opacity(0.08), .clear, CEColor.earthDeep],
+                colors: [Color.white.opacity(0.06), .clear, CEColor.earthDeep],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .ignoresSafeArea()
 
-            if showConfetti {
-                ConfettiView()
-                    .ignoresSafeArea()
-                    .allowsHitTesting(false)
-            }
-
             VStack(spacing: 14) {
                 Spacer()
-                Text("Landing Complete")
+
+                Text("Landed")
                     .font(CEFont.display(34, weight: .bold))
                     .foregroundStyle(.white)
-                destinationText
+
+                if let flight {
+                    Text("\(flight.route.destination.city) reached.")
+                        .font(CEFont.body(17))
+                        .foregroundStyle(.white.opacity(0.6))
+
+                    Text("\(TimeFormatting.shortDuration(flight.focusDurationSeconds)) focused")
+                        .font(CEFont.body(14, weight: .medium))
+                        .foregroundStyle(CEColor.horizonTeal)
+                        .padding(.top, 2)
+
+                    if flight.hasPurpose {
+                        Text("Focus: \(flight.focusPurpose)")
+                            .font(CEFont.body(13))
+                            .foregroundStyle(.white.opacity(0.45))
+                            .padding(.top, 4)
+                    }
+                }
+
                 Spacer()
+
                 PrimaryPillButton(title: "Done") {
                     coordinator.dismissArrival()
                 }
                 .padding(.horizontal, 28)
                 .padding(.bottom, 28)
             }
+            .opacity(contentOpacity)
+
+            if showUnlock, let airport = journey.pendingUnlockAirport {
+                DestinationUnlockToast(airport: airport)
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                    .onAppear {
+                        let generator = UIImpactFeedbackGenerator(style: .soft)
+                        generator.impactOccurred()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.6) {
+                            withAnimation(.easeOut(duration: 0.35)) {
+                                showUnlock = false
+                            }
+                            journey.consumePendingUnlock()
+                            presentAchievementIfNeeded()
+                        }
+                    }
+            }
+
+            if showAchievement, let achievement = journey.pendingAchievement {
+                VStack {
+                    Spacer()
+                    AchievementToast(achievement: achievement)
+                        .padding(.bottom, 110)
+                }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+                .onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.4) {
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            showAchievement = false
+                        }
+                        journey.consumePendingAchievement()
+                    }
+                }
+            }
         }
         .onAppear {
-            withAnimation(.easeOut(duration: 0.4)) {
-                showConfetti = true
+            withAnimation(.easeOut(duration: 0.45)) { contentOpacity = 1 }
+            if journey.pendingUnlockAirport != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation(.easeInOut(duration: 0.4)) {
+                        showUnlock = true
+                    }
+                }
+            } else {
+                presentAchievementIfNeeded()
             }
         }
     }
 
-    @ViewBuilder
-    private var destinationText: some View {
-        if let flight = lastFlight {
-            Text("Welcome to \(flight.route.destination.city)")
-                .font(CEFont.body(17))
-                .foregroundStyle(.white.opacity(0.6))
-            Text("\(flight.route.originIATA) → \(flight.route.destinationIATA) · \(TimeFormatting.shortDuration(flight.focusDurationSeconds))")
-                .font(CEFont.body(13, weight: .medium))
-                .foregroundStyle(CEColor.horizonTeal)
-                .padding(.top, 4)
-        }
-    }
-}
-
-struct ConfettiView: View {
-    var body: some View {
-        Canvas { context, size in
-            for i in 0..<24 {
-                let x = CGFloat((i * 37) % 100) / 100.0 * size.width
-                let y = size.height * (0.10 + CGFloat(i % 8) * 0.04)
-                let w = CGFloat((i % 5) + 5)
-                let rect = CGRect(x: x, y: y, width: w, height: w * 1.4)
-                let hue = Double((i * 47) % 100) / 100.0
-                context.fill(
-                    Path(roundedRect: rect, cornerRadius: 2),
-                    with: .color(Color(hue: hue, saturation: 0.75, brightness: 0.95).opacity(0.85))
-                )
+    private func presentAchievementIfNeeded() {
+        guard journey.pendingAchievement != nil else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            withAnimation(.easeOut(duration: 0.35)) {
+                showAchievement = true
             }
         }
     }

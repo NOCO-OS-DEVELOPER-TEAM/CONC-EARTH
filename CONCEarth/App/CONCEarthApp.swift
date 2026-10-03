@@ -9,6 +9,7 @@ struct CONCEarthApp: App {
             RootView()
                 .environmentObject(coordinator)
                 .environmentObject(coordinator.store)
+                .environmentObject(coordinator.journey)
                 .environmentObject(coordinator.timer)
                 .preferredColorScheme(nil)
         }

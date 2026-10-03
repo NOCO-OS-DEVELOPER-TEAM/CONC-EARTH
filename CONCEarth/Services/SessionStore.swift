@@ -116,7 +116,7 @@ final class SessionStore: ObservableObject {
               var session = try? decoder.decode(FocusSession.self, from: data) else { return }
 
         // Reconstruct progress after relaunch.
-        if session.status == .inFlight || session.status == .paused {
+        if session.status == .inFlight || session.status == .paused || session.status == .landing || session.status == .takeoff {
             let progress = session.progress()
             if progress >= 1 {
                 session.complete()

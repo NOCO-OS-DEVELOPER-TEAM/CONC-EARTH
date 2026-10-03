@@ -43,12 +43,13 @@ struct TicketView: View {
                             .frame(width: 28, height: 28)
 
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Focus Mode")
+                                Text("Ready to board")
                                     .font(CEFont.body(14, weight: .semibold))
                                     .foregroundStyle(.white)
-                                Text("Stay present · no app blocking claimed")
+                                Text(coordinator.focusPurpose.isEmpty ? "Stay present for the journey." : "Focus: \(coordinator.focusPurpose)")
                                     .font(CEFont.body(11))
                                     .foregroundStyle(.white.opacity(0.5))
+                                    .lineLimit(1)
                             }
                         }
                         Spacer()
