@@ -1,0 +1,40 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserdata
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+xcuserdata/
+
+# Generated project (optional local); CI regenerates via XcodeGen
+# Keep project.yml as source of truth.
+CONCEarth.xcodeproj/
+CONCEarth.xcworkspace/
+
+# Swift / SPM
+.swiftpm/
+Packages/
+Package.resolved
+
+# macOS
+.DS_Store
+
+# Secrets
+*.p12
+*.mobileprovision
+AuthKey_*.p8
+.env
+.env.*
+Secrets/
+signing/
+
+# IDE
+.idea/
+.vscode/
+*.swp
