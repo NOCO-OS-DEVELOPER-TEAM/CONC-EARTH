@@ -9,14 +9,14 @@ struct BoardingView: View {
             CEColor.earthDeep.ignoresSafeArea()
             scenarioAtmosphere
                 .ignoresSafeArea()
-                .blur(radius: 28)
-                .opacity(0.85)
+                .blur(radius: 34)
+                .opacity(0.9)
 
             VStack(spacing: 28) {
                 Spacer()
 
                 Image(systemName: "airplane.departure")
-                    .font(.system(size: 42, weight: .ultraLight))
+                    .font(.system(size: 44, weight: .ultraLight))
                     .foregroundStyle(.white)
                     .opacity(phase >= 1 ? 1 : 0)
                     .offset(y: phase >= 1 ? 0 : 16)
@@ -36,7 +36,7 @@ struct BoardingView: View {
 
                 Spacer()
 
-                PrimaryPillButton(title: "GO") {
+                PrimaryPillButton(title: "LOS") {
                     coordinator.launchFlight()
                 }
                 .padding(.horizontal, 28)
@@ -50,10 +50,9 @@ struct BoardingView: View {
 
     private var phaseText: String {
         switch phase {
-        case 0: return "Preparing cabin…"
-        case 1: return "Cabin doors closed,"
-        case 2: return "Ready for departure."
-        default: return "Ready for departure."
+        case 0: return "Kabinentüren werden geschlossen…"
+        case 1, 2, 3: return "Kabinentüren geschlossen,\nBereit zum Abflug."
+        default: return "Bereit zum Abflug."
         }
     }
 
@@ -81,7 +80,7 @@ struct BoardingView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
             withAnimation(.easeOut(duration: 0.35)) { phase = 2 }
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.15) {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { phase = 3 }
         }
     }

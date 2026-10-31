@@ -23,14 +23,14 @@ struct HomeView: View {
                 Annotation(coordinator.homeAirport.city, coordinate: coordinator.homeAirport.coordinate) {
                     ZStack {
                         Circle()
-                            .fill(.white.opacity(0.16))
-                            .frame(width: 78, height: 78)
+                            .fill(.white.opacity(0.18))
+                            .frame(width: 86, height: 86)
                         Circle()
-                            .stroke(.white.opacity(0.45), lineWidth: 1)
-                            .frame(width: 48, height: 48)
+                            .stroke(.white.opacity(0.5), lineWidth: 1)
+                            .frame(width: 52, height: 52)
                         Circle()
                             .fill(CEColor.ink)
-                            .frame(width: 12, height: 12)
+                            .frame(width: 13, height: 13)
                             .overlay(Circle().stroke(.white, lineWidth: 2))
                     }
                 }
@@ -39,7 +39,7 @@ struct HomeView: View {
             .mapControls { }
             .ignoresSafeArea()
             .onAppear {
-                withAnimation(.easeInOut(duration: 1.1)) {
+                withAnimation(.easeInOut(duration: 1.15)) {
                     cameraPosition = .camera(
                         MapCamera(
                             centerCoordinate: coordinator.homeAirport.coordinate,
@@ -52,7 +52,7 @@ struct HomeView: View {
             }
 
             LinearGradient(
-                colors: [.black.opacity(0.55), .clear, .black.opacity(0.68)],
+                colors: [.black.opacity(0.5), .clear, .black.opacity(0.7)],
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -60,37 +60,24 @@ struct HomeView: View {
             .allowsHitTesting(false)
 
             VStack(alignment: .leading, spacing: 0) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(TimeFormatting.greeting())
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(germanGreeting())
                         .font(CEFont.body(16, weight: .medium))
                         .foregroundStyle(.white.opacity(0.65))
                     Text(coordinator.homeAirport.city)
-                        .font(CEFont.display(42, weight: .bold))
+                        .font(CEFont.display(44, weight: .bold))
                         .foregroundStyle(.white)
-                    Text(CEBrand.tagline)
-                        .font(CEFont.body(14, weight: .medium))
-                        .foregroundStyle(CEColor.horizonTeal)
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 18)
 
                 Spacer()
 
-                VStack(spacing: 12) {
-                    GlassPillButton(title: "Start a Flight") {
-                        coordinator.beginJourney()
-                    }
-                    Button {
-                        coordinator.openTakeMeSomewhere()
-                    } label: {
-                        Text("Take me somewhere")
-                            .font(CEFont.body(15, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.75))
-                    }
-                    .buttonStyle(.plain)
+                GlassPillButton(title: "Reise beginnen") {
+                    coordinator.beginJourney()
                 }
                 .padding(.horizontal, 28)
-                .padding(.bottom, 18)
+                .padding(.bottom, 14)
 
                 bottomPanel
                     .padding(.horizontal, 16)
@@ -101,16 +88,16 @@ struct HomeView: View {
 
     private var bottomPanel: some View {
         VStack(alignment: .leading, spacing: 0) {
-            panelRow(title: "Your Journey", subtitle: "\(snapshot.flights) flights · \(String(format: "%.0f km", snapshot.miles))") {
+            panelRow(title: "Mein", subtitle: "\(snapshot.flights) Flüge · \(String(format: "%.0f km", snapshot.miles))") {
                 coordinator.openJourney()
             }
             Divider().overlay(Color.white.opacity(0.1))
-            panelRow(title: "Your World", subtitle: "\(snapshot.destinations) destinations explored") {
-                coordinator.openWorld()
+            panelRow(title: "Lernen", subtitle: "\(VocabCatalog.all.count) Vokabeln · Englisch") {
+                coordinator.openLearn()
             }
             Divider().overlay(Color.white.opacity(0.1))
-            panelRow(title: "FlightLog", subtitle: TimeFormatting.shortDuration(snapshot.focusSeconds) + " focused") {
-                coordinator.openFlightLog()
+            panelRow(title: "Welt", subtitle: "\(snapshot.destinations) Ziele erkundet") {
+                coordinator.openWorld()
             }
         }
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -140,5 +127,14 @@ struct HomeView: View {
             .padding(.vertical, 13)
         }
         .buttonStyle(.plain)
+    }
+
+    private func germanGreeting() -> String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<11: return "Guten Morgen!"
+        case 11..<18: return "Guten Tag!"
+        default: return "Guten Abend!"
+        }
     }
 }

@@ -10,8 +10,9 @@ struct CONCEarthApp: App {
                 .environmentObject(coordinator)
                 .environmentObject(coordinator.store)
                 .environmentObject(coordinator.journey)
+                .environmentObject(coordinator.learn)
                 .environmentObject(coordinator.timer)
-                .preferredColorScheme(nil)
+                .preferredColorScheme(.dark)
         }
     }
 }

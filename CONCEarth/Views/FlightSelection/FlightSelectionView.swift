@@ -79,7 +79,7 @@ struct FlightSelectionView: View {
             scenarioRow
             durationDial
             routeCards
-            PrimaryPillButton(title: "Book Flight", isEnabled: coordinator.selectedRoute != nil) {
+            PrimaryPillButton(title: "Flug buchen", isEnabled: coordinator.selectedRoute != nil) {
                 coordinator.confirmFlight()
             }
         }

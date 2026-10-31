@@ -16,6 +16,7 @@ final class AppCoordinator: ObservableObject {
 
     let store: SessionStore
     let journey: JourneyStore
+    let learn: LearnSessionStore
     let timer: FocusTimerService
     let audio: AudioService
     let location: LocationService
@@ -24,6 +25,7 @@ final class AppCoordinator: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var lastLiveActivityUpdate = Date.distantPast
     private var lastCompletedSession: FocusSession?
+    private var screenBeforeLearn: AppScreen?
 
     enum FlightPresentation: String {
         case map
@@ -33,6 +35,7 @@ final class AppCoordinator: ObservableObject {
     init() {
         let store = SessionStore()
         let journey = JourneyStore()
+        let learn = LearnSessionStore()
         let timer = FocusTimerService()
         let audio = AudioService()
         let location = LocationService()
@@ -40,6 +43,7 @@ final class AppCoordinator: ObservableObject {
 
         self.store = store
         self.journey = journey
+        self.learn = learn
         self.timer = timer
         self.audio = audio
         self.location = location
@@ -150,8 +154,9 @@ final class AppCoordinator: ObservableObject {
         guard let session = store.activeSession else { return }
         liveActivity.start(session: session)
         audio.playTakeoff(enabled: store.soundsEnabled)
-        presentationMode = session.seat.unlocksWindowView ? .window : .map
-        cameraMode = session.seat.unlocksWindowView ? .window : .follow
+        // Start on cinematic map/follow — window is opt-in via chrome.
+        presentationMode = .map
+        cameraMode = .follow
         timer.start()
         screen = .takeoff
 
@@ -213,6 +218,37 @@ final class AppCoordinator: ObservableObject {
         }
     }
 
+    func openLearn() {
+        screen = .learnHome
+    }
+
+    func openLearnWhileFlying() {
+        screenBeforeLearn = .inFlight
+        screen = .learnHome
+    }
+
+    func startLearnLesson(size: Int) {
+        learn.startLesson(size: size)
+        if store.activeSession != nil {
+            screenBeforeLearn = screenBeforeLearn ?? screen
+        }
+        screen = .learnLesson
+    }
+
+    func exitLearn() {
+        if let back = screenBeforeLearn, store.activeSession != nil {
+            screen = back == .learnHome || back == .learnLesson ? .inFlight : back
+        } else {
+            screen = .home
+        }
+        screenBeforeLearn = nil
+    }
+
+    func returnToFlightFromLearn() {
+        screenBeforeLearn = nil
+        screen = .inFlight
+    }
+
     func finishFlight() {
         guard screen != .landing, screen != .arrival else { return }
         guard var snapshot = store.activeSession else { return }
@@ -220,6 +256,7 @@ final class AppCoordinator: ObservableObject {
 
         let sessionID = snapshot.id
         store.updateActive { $0.enterLanding() }
+        screenBeforeLearn = nil
         screen = .landing
         audio.playLanding(enabled: store.soundsEnabled)
 
@@ -286,8 +323,8 @@ final class AppCoordinator: ObservableObject {
             timer.start()
             liveActivity.start(session: session)
             audio.setCabinNoise(enabled: session.status != .paused, soundsOn: store.soundsEnabled)
-            presentationMode = session.seat.unlocksWindowView ? .window : .map
-            cameraMode = presentationMode == .window ? .window : .follow
+            presentationMode = .map
+            cameraMode = .follow
             screen = .inFlight
         case .takeoff:
             timer.start()
@@ -310,7 +347,10 @@ final class AppCoordinator: ObservableObject {
         guard let session = store.activeSession else { return }
         guard session.status == .inFlight || session.status == .paused || session.status == .landing || session.status == .takeoff else { return }
 
-        if session.progress(at: date) >= 1, session.status != .paused, screen != .landing, screen != .arrival {
+        if session.progress(at: date) >= 1,
+           session.status != .paused,
+           screen != .landing,
+           screen != .arrival {
             finishFlight()
             return
         }

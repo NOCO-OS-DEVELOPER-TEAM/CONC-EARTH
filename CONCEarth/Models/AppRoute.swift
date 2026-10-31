@@ -16,4 +16,6 @@ enum AppScreen: Equatable {
     case world
     case journey
     case boardingPass(UUID)
+    case learnHome
+    case learnLesson
 }

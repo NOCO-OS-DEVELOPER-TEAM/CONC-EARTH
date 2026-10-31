@@ -26,22 +26,22 @@ struct ArrivalView: View {
             VStack(spacing: 14) {
                 Spacer()
 
-                Text("Landed")
+                Text("Angekommen")
                     .font(CEFont.display(34, weight: .bold))
                     .foregroundStyle(.white)
 
                 if let flight {
-                    Text("\(flight.route.destination.city) reached.")
+                    Text("Willkommen in \(flight.route.destination.city)")
                         .font(CEFont.body(17))
                         .foregroundStyle(.white.opacity(0.6))
 
-                    Text("\(TimeFormatting.shortDuration(flight.focusDurationSeconds)) focused")
+                    Text("\(TimeFormatting.shortDuration(flight.focusDurationSeconds)) fokussiert")
                         .font(CEFont.body(14, weight: .medium))
                         .foregroundStyle(CEColor.horizonTeal)
                         .padding(.top, 2)
 
                     if flight.hasPurpose {
-                        Text("Focus: \(flight.focusPurpose)")
+                        Text("Fokus: \(flight.focusPurpose)")
                             .font(CEFont.body(13))
                             .foregroundStyle(.white.opacity(0.45))
                             .padding(.top, 4)
@@ -50,7 +50,7 @@ struct ArrivalView: View {
 
                 Spacer()
 
-                PrimaryPillButton(title: "Done") {
+                PrimaryPillButton(title: "Fertig") {
                     coordinator.dismissArrival()
                 }
                 .padding(.horizontal, 28)

@@ -46,6 +46,8 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         NSLocationWhenInUseUsageDescription: CONC EARTH uses your location to suggest a nearby home airport for your focus flights.
+        NSSpeechRecognitionUsageDescription: CONC EARTH uses speech recognition for speaking exercises in Learn mode.
+        NSMicrophoneUsageDescription: CONC EARTH needs the microphone so you can practice vocabulary out loud.
         NSSupportsLiveActivities: true
         UIBackgroundModes:
           - audio

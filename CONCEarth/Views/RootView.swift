@@ -38,6 +38,10 @@ struct RootView: View {
                 JourneyView()
             case .boardingPass(let id):
                 BoardingPassDetailView(sessionID: id)
+            case .learnHome:
+                LearnHomeView()
+            case .learnLesson:
+                LearnLessonView()
             }
         }
         .animation(.easeInOut(duration: 0.35), value: coordinator.screen)
