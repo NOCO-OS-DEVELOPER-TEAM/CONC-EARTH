@@ -11,6 +11,7 @@ DerivedData/
 *.dSYM.zip
 *.dSYM
 xcuserdata/
+dist/
 
 # Generated project (optional local); CI regenerates via XcodeGen
 # Keep project.yml as source of truth.
