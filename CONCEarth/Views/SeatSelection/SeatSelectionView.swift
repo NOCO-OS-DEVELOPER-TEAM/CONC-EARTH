@@ -5,6 +5,11 @@ struct SeatSelectionView: View {
     @State private var selected: Seat?
     @State private var appeared = false
 
+    private let cabinWidth: CGFloat = 292
+    private let seatSize: CGFloat = 40
+    private let seatGap: CGFloat = 8
+    private let aisleWidth: CGFloat = 28
+
     var body: some View {
         ZStack {
             CEColor.earthDeep.ignoresSafeArea()
@@ -25,19 +30,24 @@ struct SeatSelectionView: View {
                 .padding(.top, 8)
 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 18) {
-                        fuselage
-                        legend
+                    VStack(spacing: 16) {
+                        cabin
+                        Text("Fensterplätze A und F schalten die Fensteransicht frei.")
+                            .font(CEFont.body(12))
+                            .foregroundStyle(.white.opacity(0.45))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
                     }
-                    .padding(.top, 28)
+                    .padding(.top, 24)
                     .padding(.bottom, 120)
                     .opacity(appeared ? 1 : 0)
-                    .scaleEffect(appeared ? 1 : 0.96)
                 }
 
                 VStack(spacing: 10) {
                     if let selected {
-                        Text(selected.unlocksWindowView ? "Fensterplatz · Window View freigeschaltet" : "Gangplatz · \(selected.displayCode)")
+                        Text(selected.unlocksWindowView
+                             ? "Fensterplatz \(selected.displayCode) · Fensteransicht aktiv"
+                             : "Gangplatz \(selected.displayCode)")
                             .font(CEFont.body(13, weight: .medium))
                             .foregroundStyle(selected.unlocksWindowView ? CEColor.horizonTeal : .white.opacity(0.6))
                     }
@@ -54,50 +64,73 @@ struct SeatSelectionView: View {
         }
     }
 
-    private var fuselage: some View {
-        VStack(spacing: 14) {
-            // Nose / cockpit
-            ZStack {
-                UnevenRoundedRectangle(topLeadingRadius: 90, bottomLeadingRadius: 18, bottomTrailingRadius: 18, topTrailingRadius: 90)
-                    .fill(Color.white.opacity(0.07))
-                    .frame(width: 240, height: 96)
-                HStack(spacing: 16) {
-                    Capsule().fill(Color.white.opacity(0.18)).frame(width: 30, height: 12)
-                    Capsule().fill(Color.white.opacity(0.18)).frame(width: 30, height: 12)
-                }
-                .offset(y: -26)
-            }
+    private var cabin: some View {
+        // Keep seats well inside the fuselage side walls (A/F must not hang outside).
+        let seatsWidth = seatSize * 4 + seatGap * 3 + aisleWidth
+        let sidePadding = max(32, (cabinWidth - seatsWidth) / 2)
 
-            HStack(spacing: 18) {
-                ForEach(SeatMapLayout.leftColumns, id: \.self) { Text($0).frame(width: 48) }
-                Color.clear.frame(width: 28)
-                ForEach(SeatMapLayout.rightColumns, id: \.self) { Text($0).frame(width: 48) }
-            }
-            .font(CEFont.mono(12, weight: .semibold))
-            .foregroundStyle(.white.opacity(0.4))
+        return ZStack(alignment: .top) {
+            // Soft nose — aggressive top radius previously clipped A/F outside the hull.
+            UnevenRoundedRectangle(
+                topLeadingRadius: 48,
+                bottomLeadingRadius: 30,
+                bottomTrailingRadius: 30,
+                topTrailingRadius: 48
+            )
+            .fill(Color.white.opacity(0.08))
+            .overlay(
+                UnevenRoundedRectangle(
+                    topLeadingRadius: 48,
+                    bottomLeadingRadius: 30,
+                    bottomTrailingRadius: 30,
+                    topTrailingRadius: 48
+                )
+                .stroke(Color.white.opacity(0.12), lineWidth: 1)
+            )
+            .frame(width: cabinWidth)
+            .frame(minHeight: 440)
 
-            ForEach(SeatMapLayout.rows, id: \.self) { row in
-                HStack(spacing: 18) {
-                    ForEach(SeatMapLayout.leftColumns, id: \.self) { letter in
-                        seatButton(Seat(row: row, letter: letter))
-                    }
-                    Text(String(format: "%02d", row))
-                        .font(CEFont.mono(11, weight: .medium))
-                        .foregroundStyle(.white.opacity(0.35))
-                        .frame(width: 28)
-                    ForEach(SeatMapLayout.rightColumns, id: \.self) { letter in
-                        seatButton(Seat(row: row, letter: letter))
-                    }
+            VStack(spacing: 12) {
+                Capsule()
+                    .fill(Color.white.opacity(0.12))
+                    .frame(width: 64, height: 8)
+                    .padding(.top, 18)
+
+                HStack(spacing: 14) {
+                    Capsule().fill(Color.white.opacity(0.18)).frame(width: 28, height: 11)
+                    Capsule().fill(Color.white.opacity(0.18)).frame(width: 28, height: 11)
                 }
+
+                HStack(spacing: seatGap) {
+                    ForEach(SeatMapLayout.leftColumns, id: \.self) { Text($0).frame(width: seatSize) }
+                    Color.clear.frame(width: aisleWidth)
+                    ForEach(SeatMapLayout.rightColumns, id: \.self) { Text($0).frame(width: seatSize) }
+                }
+                .font(CEFont.mono(11, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.4))
+                .padding(.horizontal, sidePadding)
+
+                ForEach(SeatMapLayout.rows, id: \.self) { row in
+                    HStack(spacing: seatGap) {
+                        ForEach(SeatMapLayout.leftColumns, id: \.self) { letter in
+                            seatButton(Seat(row: row, letter: letter))
+                        }
+                        Text(String(format: "%02d", row))
+                            .font(CEFont.mono(10, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.35))
+                            .frame(width: aisleWidth)
+                        ForEach(SeatMapLayout.rightColumns, id: \.self) { letter in
+                            seatButton(Seat(row: row, letter: letter))
+                        }
+                    }
+                    .padding(.horizontal, sidePadding)
+                }
+
+                Spacer(minLength: 28)
             }
+            .padding(.bottom, 22)
         }
-        .padding(.vertical, 18)
-        .padding(.horizontal, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 36, style: .continuous)
-                .fill(Color.white.opacity(0.035))
-                .frame(width: 300)
-        )
+        .frame(width: cabinWidth)
     }
 
     private func seatButton(_ seat: Seat) -> some View {
@@ -105,32 +138,22 @@ struct SeatSelectionView: View {
         return Button {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.78)) { selected = seat }
         } label: {
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isSelected ? CEColor.horizonTeal : Color.white.opacity(0.12))
-                .frame(width: 48, height: 48)
+            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .fill(isSelected ? CEColor.horizonTeal : Color.white.opacity(0.14))
+                .frame(width: seatSize, height: seatSize)
                 .overlay {
                     if seat.position == .window {
                         Image(systemName: "window.ceiling")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(isSelected ? CEColor.ink : .white.opacity(0.5))
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(isSelected ? CEColor.ink : .white.opacity(0.55))
                     }
                 }
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .stroke(isSelected ? Color.white.opacity(0.8) : Color.clear, lineWidth: 1.5)
+                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        .stroke(isSelected ? Color.white.opacity(0.85) : Color.clear, lineWidth: 1.5)
                 )
-                .scaleEffect(isSelected ? 1.06 : 1)
+                .scaleEffect(isSelected ? 1.05 : 1)
         }
         .buttonStyle(.plain)
-    }
-
-    private var legend: some View {
-        HStack(spacing: 16) {
-            Label("Fenster", systemImage: "window.ceiling")
-            Text("·")
-            Text("A / F schaltet Window View frei")
-        }
-        .font(CEFont.body(12))
-        .foregroundStyle(.white.opacity(0.45))
     }
 }

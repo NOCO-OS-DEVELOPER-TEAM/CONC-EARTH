@@ -3,7 +3,7 @@ import SwiftUI
 enum CEBrand {
     static let name = "CONC EARTH"
     static let subtitle = "Concentration Earth"
-    static let tagline = "Focus takes you somewhere."
+    static let tagline = "Fokus bringt dich irgendwohin."
 }
 
 enum CEColor {

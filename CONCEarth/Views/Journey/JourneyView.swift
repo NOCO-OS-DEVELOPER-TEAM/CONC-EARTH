@@ -19,7 +19,7 @@ struct JourneyView: View {
                         coordinator.goHome()
                     }
                     Spacer()
-                    Text("Your Journey")
+                    Text("Meine Reise")
                         .font(CEFont.body(17, weight: .semibold))
                         .foregroundStyle(.white)
                     Spacer()
@@ -45,17 +45,17 @@ struct JourneyView: View {
 
     private var summary: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Focus takes you somewhere.")
+            Text("Fokus bringt dich irgendwohin.")
                 .font(CEFont.body(14))
                 .foregroundStyle(.white.opacity(0.5))
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                quietStat("\(snapshot.destinations)", "destinations")
-                quietStat(String(format: "%.0f km", snapshot.miles), "flight miles")
-                quietStat("\(snapshot.flights)", "flights")
-                quietStat(TimeFormatting.shortDuration(snapshot.focusSeconds), "focused")
-                quietStat("\(snapshot.streak)d", "streak")
-                quietStat("\(journey.unlockedAirports.count)", "airports")
+                quietStat("\(snapshot.destinations)", "Ziele")
+                quietStat(String(format: "%.0f km", snapshot.miles), "Flugmeilen")
+                quietStat("\(snapshot.flights)", "Flüge")
+                quietStat(TimeFormatting.shortDuration(snapshot.focusSeconds), "fokussiert")
+                quietStat("\(snapshot.streak) T.", "Serie")
+                quietStat("\(journey.unlockedAirports.count)", "Flughäfen")
             }
         }
     }
@@ -66,10 +66,10 @@ struct JourneyView: View {
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Explored World")
+                    Text("Erkannte Welt")
                         .font(CEFont.body(16, weight: .semibold))
                         .foregroundStyle(.white)
-                    Text("Open your personal map")
+                    Text("Persönliche Karte öffnen")
                         .font(CEFont.body(12))
                         .foregroundStyle(.white.opacity(0.45))
                 }
@@ -85,7 +85,7 @@ struct JourneyView: View {
 
     private var achievements: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Milestones")
+            Text("Meilensteine")
                 .font(CEFont.body(13, weight: .medium))
                 .foregroundStyle(.white.opacity(0.45))
 
@@ -105,14 +105,14 @@ struct JourneyView: View {
 
     private var settings: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Traveler")
+            Text("Reisende:r")
                 .font(CEFont.body(13, weight: .medium))
                 .foregroundStyle(.white.opacity(0.45))
             TextField("Name", text: $store.passengerName)
                 .padding(12)
                 .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
                 .foregroundStyle(.white)
-            Toggle("Flight sounds", isOn: $store.soundsEnabled)
+            Toggle("Fluggeräusche", isOn: $store.soundsEnabled)
                 .tint(CEColor.horizonTeal)
                 .foregroundStyle(.white)
         }

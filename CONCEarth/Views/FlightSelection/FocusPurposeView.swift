@@ -14,7 +14,7 @@ struct FocusPurposeView: View {
                         coordinator.backFromPurpose()
                     }
                     Spacer()
-                    Button("Skip") {
+                    Button("Überspringen") {
                         coordinator.skipFocusPurpose()
                     }
                     .font(CEFont.body(14, weight: .medium))
@@ -26,11 +26,11 @@ struct FocusPurposeView: View {
                 Spacer()
 
                 VStack(alignment: .leading, spacing: 18) {
-                    Text("What are you focusing on?")
+                    Text("Worauf fokussierst du?")
                         .font(CEFont.display(28, weight: .bold))
                         .foregroundStyle(.white)
 
-                    TextField("e.g. Study math, write, deep work", text: $coordinator.focusPurpose)
+                    TextField("z. B. Mathe lernen, schreiben, Deep Work", text: $coordinator.focusPurpose)
                         .focused($focused)
                         .font(CEFont.body(17))
                         .foregroundStyle(.white)
@@ -43,7 +43,7 @@ struct FocusPurposeView: View {
 
                     if let route = coordinator.selectedRoute {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Focus destination")
+                            Text("Fokus-Ziel")
                                 .font(CEFont.body(12, weight: .medium))
                                 .foregroundStyle(.white.opacity(0.4))
                             Text(route.destination.displayTitle)
@@ -53,7 +53,7 @@ struct FocusPurposeView: View {
                                 .font(CEFont.body(13))
                                 .foregroundStyle(CEColor.horizonTeal)
                             if coordinator.focusPurpose.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
-                                Text("Focus: \(coordinator.focusPurpose)")
+                                Text("Fokus: \(coordinator.focusPurpose)")
                                     .font(CEFont.body(13))
                                     .foregroundStyle(.white.opacity(0.5))
                             }
@@ -65,7 +65,7 @@ struct FocusPurposeView: View {
 
                 Spacer()
 
-                PrimaryPillButton(title: "Continue") {
+                PrimaryPillButton(title: "Weiter") {
                     coordinator.confirmFocusPurpose()
                 }
                 .padding(.horizontal, 28)

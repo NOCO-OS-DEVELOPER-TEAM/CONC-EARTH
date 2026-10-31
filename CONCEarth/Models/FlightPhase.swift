@@ -10,10 +10,10 @@ enum FlightPhase: String, Codable, Hashable {
     var title: String {
         switch self {
         case .boarding: return "Boarding"
-        case .takeoff: return "Takeoff"
-        case .cruise: return "Cruise"
-        case .landing: return "Landing"
-        case .landed: return "Landed"
+        case .takeoff: return "Start"
+        case .cruise: return "Reiseflug"
+        case .landing: return "Landung"
+        case .landed: return "Gelandet"
         }
     }
 

@@ -14,7 +14,7 @@ struct FlightLogView: View {
                         coordinator.goHome()
                     }
                     Spacer()
-                    Text("FlightLog")
+                    Text("Flugtagebuch")
                         .font(CEFont.body(17, weight: .semibold))
                         .foregroundStyle(.white)
                     Spacer()
@@ -25,7 +25,7 @@ struct FlightLogView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Travel journal")
+                        Text("Reisejournal")
                             .font(CEFont.body(13))
                             .foregroundStyle(.white.opacity(0.4))
 
@@ -60,7 +60,7 @@ struct FlightLogView: View {
                 HStack(spacing: 10) {
                     Text(TimeFormatting.shortDuration(session.focusDurationSeconds))
                     Text("·")
-                    Text(session.seat.unlocksWindowView ? "Window" : session.seat.displayCode)
+                    Text(session.seat.unlocksWindowView ? "Fenster" : session.seat.displayCode)
                     Text("·")
                     Text(String(format: "%.0f km", session.route.distanceKilometers))
                 }
@@ -85,10 +85,10 @@ struct FlightLogView: View {
 
     private var emptyState: some View {
         VStack(spacing: 10) {
-            Text("No journeys yet")
+            Text("Noch keine Reisen")
                 .font(CEFont.body(16, weight: .semibold))
                 .foregroundStyle(.white)
-            Text("Completed focus flights become part of your journal.")
+            Text("Abgeschlossene Fokusflüge landen hier im Journal.")
                 .font(CEFont.body(13))
                 .foregroundStyle(.white.opacity(0.45))
                 .multilineTextAlignment(.center)

@@ -79,8 +79,8 @@ enum RouteGeometry {
             let altitude = max(80_000, min(1_800_000, distance * 1.35))
             return CameraPose(center: mid, distance: altitude, heading: 0, pitch: 35)
         case .follow:
-            let altitude: CLLocationDistance = scenario == .longHaul ? 18_000 : 12_000
-            return CameraPose(center: plane, distance: altitude, heading: heading, pitch: 55)
+            let altitude: CLLocationDistance = scenario == .longHaul ? 12_000 : 7_500
+            return CameraPose(center: plane, distance: altitude, heading: heading, pitch: 48)
         case .window:
             let altitude: CLLocationDistance = 8_500
             return CameraPose(center: plane, distance: altitude, heading: heading + 25, pitch: 70)
@@ -105,8 +105,8 @@ enum FlightCameraMode: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .route: return "Route"
-        case .follow: return "Follow"
-        case .window: return "Window"
+        case .follow: return "Folgen"
+        case .window: return "Fenster"
         }
     }
 

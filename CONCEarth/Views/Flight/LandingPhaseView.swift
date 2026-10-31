@@ -23,7 +23,7 @@ struct LandingPhaseView: View {
                     .offset(y: settle)
                     .opacity(opacity)
 
-                Text("Landing")
+                Text("Landung")
                     .font(CEFont.display(28, weight: .bold))
                     .foregroundStyle(.white)
                     .opacity(opacity)

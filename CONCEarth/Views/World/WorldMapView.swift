@@ -81,7 +81,7 @@ struct WorldMapView: View {
             }
             Spacer()
             VStack(spacing: 2) {
-                Text("Your World")
+                Text("Deine Welt")
                     .font(CEFont.body(16, weight: .semibold))
                     .foregroundStyle(.white)
                 if let active = activeRoute {
@@ -99,15 +99,15 @@ struct WorldMapView: View {
 
     private var footer: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Already explored")
+            Text("Bereits erkundet")
                 .font(CEFont.body(12, weight: .medium))
                 .foregroundStyle(.white.opacity(0.5))
             HStack {
-                stat("\(snapshot.destinations)", "destinations")
+                stat("\(snapshot.destinations)", "Ziele")
                 Spacer()
-                stat(String(format: "%.0f km", snapshot.kilometers), "flown")
+                stat(String(format: "%.0f km", snapshot.kilometers), "geflogen")
                 Spacer()
-                stat("\(snapshot.flights)", "flights")
+                stat("\(snapshot.flights)", "Flüge")
             }
         }
         .padding(18)

@@ -41,7 +41,7 @@ final class LiveActivityService: ObservableObject {
                 destinationIATA: session.route.destinationIATA,
                 remainingSeconds: 0,
                 progress: 1,
-                statusText: "LANDED",
+                statusText: "GELANDET",
                 seatCode: session.seat.displayCode,
                 focusMinutes: session.focusMinutes,
                 distanceKilometers: Int(session.route.distanceKilometers.rounded()),
@@ -53,7 +53,7 @@ final class LiveActivityService: ObservableObject {
                 destinationIATA: "—",
                 remainingSeconds: 0,
                 progress: 1,
-                statusText: "LANDED",
+                statusText: "GELANDET",
                 seatCode: "—",
                 focusMinutes: 0,
                 distanceKilometers: 0,
@@ -70,10 +70,10 @@ final class LiveActivityService: ObservableObject {
         let phase = session.phase()
         let status: String
         switch session.status {
-        case .paused: status = "Paused"
-        case .takeoff: status = "Takeoff"
-        case .landing: status = "Landing"
-        default: status = phase == .landing ? "Landing" : "In Flight"
+        case .paused: status = "Pausiert"
+        case .takeoff: status = "Start"
+        case .landing: status = "Landung"
+        default: status = phase == .landing ? "Landung" : "Im Flug"
         }
 
         return FocusFlightAttributes.ContentState(

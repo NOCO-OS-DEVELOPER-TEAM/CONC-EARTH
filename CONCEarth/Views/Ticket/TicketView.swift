@@ -43,17 +43,17 @@ struct TicketView: View {
                             .frame(width: 28, height: 28)
 
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Ready to board")
+                                Text("Bereit zum Boarding")
                                     .font(CEFont.body(14, weight: .semibold))
                                     .foregroundStyle(.white)
-                                Text(coordinator.focusPurpose.isEmpty ? "Stay present for the journey." : "Focus: \(coordinator.focusPurpose)")
+                                Text(coordinator.focusPurpose.isEmpty ? "Bleib präsent auf der Reise." : "Fokus: \(coordinator.focusPurpose)")
                                     .font(CEFont.body(11))
                                     .foregroundStyle(.white.opacity(0.5))
                                     .lineLimit(1)
                             }
                         }
                         Spacer()
-                        Text("Edit")
+                        Text("Bearbeiten")
                             .font(CEFont.body(13, weight: .medium))
                             .foregroundStyle(.white.opacity(0.7))
                             .onTapGesture { coordinator.backFromTicket() }
@@ -163,12 +163,12 @@ struct TicketView: View {
                     .foregroundStyle(.white)
 
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 18) {
-                        ticketField("Passenger", store.passengerName)
-                        ticketField("Seat", coordinator.selectedSeat?.displayCode ?? "—")
-                        ticketField("Distance", coordinator.draftDistanceLabel)
-                        ticketField("Flight", coordinator.selectedRoute?.flightNumber ?? "—")
-                        ticketField("Boarding", "Now")
-                        ticketField("Scenario", coordinator.selectedScenario.title)
+                        ticketField("Passagier", store.passengerName)
+                        ticketField("Sitz", coordinator.selectedSeat?.displayCode ?? "—")
+                        ticketField("Distanz", coordinator.draftDistanceLabel)
+                        ticketField("Flug", coordinator.selectedRoute?.flightNumber ?? "—")
+                        ticketField("Boarding", "Jetzt")
+                        ticketField("Szenario", coordinator.selectedScenario.title)
                     }
                 }
                 .padding(22)
@@ -187,14 +187,14 @@ struct TicketView: View {
             Text("Boarding Pass")
                 .font(CEFont.display(28, weight: .bold))
                 .foregroundStyle(.white)
-            Text(CEBrand.tagline)
+            Text("Fokus bringt dich irgendwohin.")
                 .font(CEFont.body(14))
                 .foregroundStyle(.white.opacity(0.6))
             Spacer()
-            Text("Aircraft \(coordinator.selectedRoute?.aircraftType ?? "—")")
+            Text("Flugzeug \(coordinator.selectedRoute?.aircraftType ?? "—")")
                 .font(CEFont.body(13))
                 .foregroundStyle(.white.opacity(0.7))
-            Text("Drag or tap to flip")
+            Text("Ziehen oder tippen zum Umdrehen")
                 .font(CEFont.body(12))
                 .foregroundStyle(.white.opacity(0.4))
         }

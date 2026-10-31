@@ -192,6 +192,22 @@ final class AppCoordinator: ObservableObject {
         }
     }
 
+    func cancelFlight() {
+        guard store.activeSession != nil else { return }
+        liveActivity.end(session: store.activeSession)
+        audio.stopAll()
+        timer.stop()
+        store.clearActive()
+        selectedSeat = nil
+        selectedRoute = nil
+        focusPurpose = ""
+        surpriseReveal = nil
+        presentationMode = .map
+        cameraMode = .follow
+        screenBeforeLearn = nil
+        screen = .home
+    }
+
     func pauseFlight() {
         store.updateActive { $0.pause() }
         if let session = store.activeSession {

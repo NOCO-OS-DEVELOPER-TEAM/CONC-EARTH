@@ -14,7 +14,7 @@ struct FlightSelectionView: View {
         )
     }
 
-    private let focusOptions = [25, 30, 45, 60, 90, 120]
+    private let focusOptions = [5, 10, 15, 20, 25, 30, 45, 60, 90, 120]
 
     var body: some View {
         ZStack {
@@ -123,24 +123,26 @@ struct FlightSelectionView: View {
 
     private var durationDial: some View {
         VStack(spacing: 8) {
-            Text("Focus duration")
+            Text("Fokusdauer")
                 .font(CEFont.body(12, weight: .medium))
                 .foregroundStyle(.white.opacity(0.6))
-            HStack(spacing: 8) {
-                ForEach(focusOptions, id: \.self) { minutes in
-                    Button {
-                        coordinator.focusMinutes = minutes
-                    } label: {
-                        Text(TimeFormatting.minutesLabel(minutes))
-                            .font(CEFont.mono(13, weight: .semibold))
-                            .foregroundStyle(coordinator.focusMinutes == minutes ? CEColor.ink : .white)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 8)
-                            .background(
-                                Capsule().fill(coordinator.focusMinutes == minutes ? CEColor.aviationYellow : Color.white.opacity(0.1))
-                            )
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(focusOptions, id: \.self) { minutes in
+                        Button {
+                            coordinator.focusMinutes = minutes
+                        } label: {
+                            Text(TimeFormatting.minutesLabel(minutes))
+                                .font(CEFont.mono(13, weight: .semibold))
+                                .foregroundStyle(coordinator.focusMinutes == minutes ? CEColor.ink : .white)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 8)
+                                .background(
+                                    Capsule().fill(coordinator.focusMinutes == minutes ? CEColor.aviationYellow : Color.white.opacity(0.1))
+                                )
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }

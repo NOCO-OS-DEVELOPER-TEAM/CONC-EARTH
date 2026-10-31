@@ -23,7 +23,7 @@ struct TakeoffView: View {
                     .offset(y: lift)
                     .opacity(opacity)
 
-                Text("Takeoff")
+                Text("Start")
                     .font(CEFont.display(28, weight: .bold))
                     .foregroundStyle(.white)
                     .opacity(opacity)

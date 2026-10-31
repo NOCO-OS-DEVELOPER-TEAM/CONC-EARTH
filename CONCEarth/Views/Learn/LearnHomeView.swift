@@ -57,10 +57,10 @@ struct LearnHomeView: View {
                         }
 
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("Pack")
+                            Text("Paket")
                                 .font(CEFont.body(13, weight: .medium))
                                 .foregroundStyle(.white.opacity(0.45))
-                            Text("Childcare & Vocational English")
+                            Text("Kinderbetreuung & Berufliches Englisch")
                                 .font(CEFont.body(16, weight: .semibold))
                                 .foregroundStyle(.white)
                             Text("\(VocabCatalog.all.count) Einträge · später erweiterbar")

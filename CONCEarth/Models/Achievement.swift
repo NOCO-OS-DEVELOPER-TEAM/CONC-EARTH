@@ -16,31 +16,31 @@ enum AchievementID: String, Codable, CaseIterable, Identifiable, Hashable {
 
     var title: String {
         switch self {
-        case .firstNightFlight: return "First Night Flight"
-        case .tenFlights: return "10 Flights Completed"
-        case .fiveHoursFocused: return "5 Hours Focused"
-        case .firstLongHaul: return "First Long-Haul Flight"
-        case .sevenDayStreak: return "7 Day Flight Streak"
-        case .firstInternational: return "First International Flight"
-        case .firstWindowSeat: return "First Window Seat Flight"
-        case .firstThousandMiles: return "1,000 km flown"
-        case .fiveThousandMiles: return "5,000 km flown"
-        case .tenThousandMiles: return "10,000 km flown"
+        case .firstNightFlight: return "Erster Nachtflug"
+        case .tenFlights: return "10 Flüge absolviert"
+        case .fiveHoursFocused: return "5 Stunden fokussiert"
+        case .firstLongHaul: return "Erster Langstreckenflug"
+        case .sevenDayStreak: return "7-Tage-Serie"
+        case .firstInternational: return "Erster internationaler Flug"
+        case .firstWindowSeat: return "Erster Fensterplatz"
+        case .firstThousandMiles: return "1.000 km geflogen"
+        case .fiveThousandMiles: return "5.000 km geflogen"
+        case .tenThousandMiles: return "10.000 km geflogen"
         }
     }
 
     var subtitle: String {
         switch self {
-        case .firstNightFlight: return "Quiet skies, deep work."
-        case .tenFlights: return "A growing journey."
-        case .fiveHoursFocused: return "Time well spent."
-        case .firstLongHaul: return "Distant horizons."
-        case .sevenDayStreak: return "Consistency over intensity."
-        case .firstInternational: return "Across a border."
-        case .firstWindowSeat: return "A view worth keeping."
-        case .firstThousandMiles: return "Flight miles begin."
-        case .fiveThousandMiles: return "The world widens."
-        case .tenThousandMiles: return "A serious traveler."
+        case .firstNightFlight: return "Ruhige Nacht, tiefer Fokus."
+        case .tenFlights: return "Die Reise wächst."
+        case .fiveHoursFocused: return "Gut investierte Zeit."
+        case .firstLongHaul: return "Ferne Horizonte."
+        case .sevenDayStreak: return "Konstanz vor Intensität."
+        case .firstInternational: return "Über eine Grenze."
+        case .firstWindowSeat: return "Ein Blick, der bleibt."
+        case .firstThousandMiles: return "Die Meilen beginnen."
+        case .fiveThousandMiles: return "Die Welt wird größer."
+        case .tenThousandMiles: return "Ein echter Reisender."
         }
     }
 }

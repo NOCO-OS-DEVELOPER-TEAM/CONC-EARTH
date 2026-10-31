@@ -73,8 +73,18 @@ struct HomeView: View {
 
                 Spacer()
 
-                GlassPillButton(title: "Reise beginnen") {
-                    coordinator.beginJourney()
+                VStack(spacing: 12) {
+                    GlassPillButton(title: "Reise beginnen") {
+                        coordinator.beginJourney()
+                    }
+                    Button {
+                        coordinator.openTakeMeSomewhere()
+                    } label: {
+                        Text("Bring mich irgendwohin")
+                            .font(CEFont.body(15, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.75))
+                    }
+                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 28)
                 .padding(.bottom, 14)

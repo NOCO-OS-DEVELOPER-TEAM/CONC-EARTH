@@ -19,7 +19,7 @@ struct BoardingPassDetailView: View {
                         coordinator.openFlightLog()
                     }
                     Spacer()
-                    Text("Boarding Pass")
+                    Text("Boardingpass")
                         .font(CEFont.body(16, weight: .semibold))
                         .foregroundStyle(.white)
                     Spacer()
@@ -73,16 +73,16 @@ struct BoardingPassDetailView: View {
             .foregroundStyle(.white)
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
-                field("Passenger", session.passengerName)
-                field("Seat", session.seat.displayCode)
-                field("Flight", session.route.flightNumber)
-                field("Distance", String(format: "%.0f km", session.route.distanceKilometers))
-                field("Focus", TimeFormatting.shortDuration(session.focusDurationSeconds))
-                field("Date", dateString(session.endedAt ?? session.createdAt))
+                field("Passagier", session.passengerName)
+                field("Sitz", session.seat.displayCode)
+                field("Flug", session.route.flightNumber)
+                field("Distanz", String(format: "%.0f km", session.route.distanceKilometers))
+                field("Fokus", TimeFormatting.shortDuration(session.focusDurationSeconds))
+                field("Datum", dateString(session.endedAt ?? session.createdAt))
             }
 
             if session.hasPurpose {
-                field("Purpose", session.focusPurpose)
+                field("Zweck", session.focusPurpose)
             }
         }
         .padding(22)

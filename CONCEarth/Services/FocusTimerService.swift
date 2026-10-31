@@ -10,7 +10,7 @@ final class FocusTimerService: ObservableObject {
     func start() {
         stop()
         now = Date()
-        timer = Timer.publish(every: 0.25, on: .main, in: .common)
+        timer = Timer.publish(every: 0.5, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] date in
                 self?.now = date

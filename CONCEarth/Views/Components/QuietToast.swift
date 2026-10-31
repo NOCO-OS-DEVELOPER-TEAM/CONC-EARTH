@@ -5,7 +5,7 @@ struct DestinationUnlockToast: View {
 
     var body: some View {
         VStack(spacing: 10) {
-            Text("New destination")
+            Text("Neues Ziel")
                 .font(CEFont.body(12, weight: .medium))
                 .foregroundStyle(.white.opacity(0.55))
             Text(airport.displayTitle)

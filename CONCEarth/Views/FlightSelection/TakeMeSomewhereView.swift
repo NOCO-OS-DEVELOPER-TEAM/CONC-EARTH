@@ -3,7 +3,7 @@ import SwiftUI
 struct TakeMeSomewhereView: View {
     @EnvironmentObject private var coordinator: AppCoordinator
 
-    private let options = [25, 45, 60, 90, 120]
+    private let options = [5, 10, 15, 20, 25, 45, 60, 90, 120]
 
     var body: some View {
         ZStack {
@@ -29,11 +29,11 @@ struct TakeMeSomewhereView: View {
                 Spacer()
 
                 VStack(spacing: 12) {
-                    Text("Take me somewhere")
+                    Text("Bring mich irgendwohin")
                         .font(CEFont.display(30, weight: .bold))
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
-                    Text("Choose a focus duration.\nWe’ll find the route.")
+                    Text("Wähle deine Fokuszeit.\nWir finden die Route.")
                         .font(CEFont.body(15))
                         .foregroundStyle(.white.opacity(0.5))
                         .multilineTextAlignment(.center)
@@ -42,30 +42,33 @@ struct TakeMeSomewhereView: View {
 
                 Spacer().frame(height: 36)
 
-                HStack(spacing: 8) {
-                    ForEach(options, id: \.self) { minutes in
-                        Button {
-                            coordinator.focusMinutes = minutes
-                            coordinator.surpriseReveal = nil
-                        } label: {
-                            Text(TimeFormatting.minutesLabel(minutes))
-                                .font(CEFont.mono(13, weight: .semibold))
-                                .foregroundStyle(coordinator.focusMinutes == minutes ? CEColor.ink : .white)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 10)
-                                .background(
-                                    Capsule().fill(coordinator.focusMinutes == minutes ? Color.white : Color.white.opacity(0.1))
-                                )
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(options, id: \.self) { minutes in
+                            Button {
+                                coordinator.focusMinutes = minutes
+                                coordinator.surpriseReveal = nil
+                            } label: {
+                                Text(TimeFormatting.minutesLabel(minutes))
+                                    .font(CEFont.mono(13, weight: .semibold))
+                                    .foregroundStyle(coordinator.focusMinutes == minutes ? CEColor.ink : .white)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 10)
+                                    .background(
+                                        Capsule().fill(coordinator.focusMinutes == minutes ? Color.white : Color.white.opacity(0.1))
+                                    )
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
+                    .padding(.horizontal, 20)
                 }
 
                 Spacer().frame(height: 28)
 
                 if let route = coordinator.surpriseReveal {
                     VStack(spacing: 10) {
-                        Text("Your destination")
+                        Text("Dein Ziel")
                             .font(CEFont.body(12, weight: .medium))
                             .foregroundStyle(.white.opacity(0.45))
                         Text(route.destination.displayTitle)
@@ -84,12 +87,12 @@ struct TakeMeSomewhereView: View {
                 Spacer()
 
                 if coordinator.surpriseReveal == nil {
-                    PrimaryPillButton(title: "Find destination") {
+                    PrimaryPillButton(title: "Ziel finden") {
                         coordinator.revealSurpriseDestination()
                     }
                     .padding(.horizontal, 28)
                 } else {
-                    PrimaryPillButton(title: "Start Flight") {
+                    PrimaryPillButton(title: "Flug starten") {
                         coordinator.startSurpriseFlight()
                     }
                     .padding(.horizontal, 28)

@@ -12,23 +12,23 @@ enum FlightScenario: String, Codable, CaseIterable, Identifiable, Hashable {
 
     var title: String {
         switch self {
-        case .calm: return "Calm Flight"
-        case .night: return "Night Flight"
-        case .sunset: return "Sunset Flight"
-        case .morning: return "Morning Flight"
-        case .storm: return "Storm Flight"
-        case .longHaul: return "Long Haul"
+        case .calm: return "Ruhiger Flug"
+        case .night: return "Nachtflug"
+        case .sunset: return "Sonnenuntergang"
+        case .morning: return "Morgenflug"
+        case .storm: return "Gewitterflug"
+        case .longHaul: return "Langstrecke"
         }
     }
 
     var subtitle: String {
         switch self {
-        case .calm: return "Quiet cabin. Steady focus."
-        case .night: return "Dark sky. Deep work."
-        case .sunset: return "Golden light. Soft pace."
-        case .morning: return "Clear air. Fresh start."
-        case .storm: return "Moody atmosphere. Still calm."
-        case .longHaul: return "Long sessions. Distant horizons."
+        case .calm: return "Ruhige Kabine. Gleichmäßiger Fokus."
+        case .night: return "Dunkler Himmel. Tiefes Arbeiten."
+        case .sunset: return "Goldenes Licht. Sanftes Tempo."
+        case .morning: return "Klare Luft. Frischer Start."
+        case .storm: return "Stimmung, aber ruhig."
+        case .longHaul: return "Lange Sessions. Weite Horizonte."
         }
     }
 
@@ -37,7 +37,7 @@ enum FlightScenario: String, Codable, CaseIterable, Identifiable, Hashable {
         case .calm: return 45
         case .night: return 60
         case .sunset: return 40
-        case .morning: return 30
+        case .morning: return 25
         case .storm: return 50
         case .longHaul: return 120
         }
