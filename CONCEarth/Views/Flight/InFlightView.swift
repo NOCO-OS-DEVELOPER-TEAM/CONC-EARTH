@@ -205,7 +205,9 @@ struct InFlightView: View {
                         AirportRunwayBadge(systemName: "airplane.arrival")
                     }
                     Annotation("", coordinate: planeCoordinate) {
-                        PlaneMarker(heading: heading)
+                        // In follow mode the map already faces the route heading,
+                        // so keep the jet nose pointing "up" the screen.
+                        PlaneMarker(heading: coordinator.cameraMode == .follow ? 0 : heading)
                     }
                 }
             }

@@ -41,11 +41,7 @@ struct FlightPipOverlay: View {
                                 progress: progress
                             )) {
                                 PlaneMarker(
-                                    heading: RouteGeometry.heading(
-                                        from: session.route.origin.coordinate,
-                                        to: session.route.destination.coordinate,
-                                        progress: progress
-                                    ),
+                                    heading: 0,
                                     showBadge: false,
                                     scale: 0.55
                                 )
